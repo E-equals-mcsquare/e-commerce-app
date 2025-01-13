@@ -1,16 +1,29 @@
-FROM node:20.11.1
+# Stage 1
 
-WORKDIR /app
+FROM node:20.11.1 as builder
 
-COPY package.json ./
-COPY package-lock.json ./
+WORKDIR /build
+
+COPY package*.json .
 
 RUN npm set registry https://registry.npmjs.org/
 RUN npm set strict-ssl false
 
 RUN npm install
 
-COPY . .
+COPY src/ src/
+COPY tsconfig.json tsconfig.json
 
-EXPOSE 3000
-CMD ["npm", "run", "start"]
+RUN npm run build
+
+# Stage 2
+
+FROM node:20.11.1 as runner
+
+WORKDIR /app
+
+COPY --from=builder build/package*.json .
+COPY --from=builder build/node_modules node_modules/
+COPY --from=builder build/dist dist/
+
+CMD ["npm", "start"]

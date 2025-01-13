@@ -5,7 +5,7 @@
     },
     "settings": {},
     "extensions": [
-      "ms-kubernetes-tools.vscode-kubernetes-tools" // Optional: Install Kubernetes extension for VS Code
+      // "ms-kubernetes-tools.vscode-kubernetes-tools" // Optional: Install Kubernetes extension for VS Code
     ],
     "postCreateCommand": "kubectl version --client",
     "remoteUser": "vscode"

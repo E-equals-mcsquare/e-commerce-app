@@ -17,12 +17,21 @@ RUN apt-get update && \
     echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list && \
     apt-get update && \
     apt-get install -y docker-ce docker-ce-cli containerd.io && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install AWS CLI
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
+    apt-get install -y unzip && \
+    unzip awscliv2.zip && \
+    ./aws/install && \
+    rm -rf awscliv2.zip aws && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Add the 'vscode' user to the Docker group
 RUN groupadd docker && \
-    usermod -aG docker vscode && \
-    newgrp docker
+    usermod -aG docker vscode
 
-    # Set the default user to vscode
+# Set the default user to vscode
 USER vscode

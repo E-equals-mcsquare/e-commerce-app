@@ -6,6 +6,12 @@ This project is a scalable, modular e-commerce platform designed using a microse
 
 ---
 
+## Architecture
+![image](https://github.com/user-attachments/assets/26d89330-bba2-474b-820b-c9c498cb2bc3)
+
+
+---
+
 ## Project Structure
 ```
 ecommerce-platform/

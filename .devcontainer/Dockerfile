@@ -1,4 +1,4 @@
-# Use a base image that suits your project
+# Use a base image with Ubuntu
 FROM mcr.microsoft.com/devcontainers/base:ubuntu
 
 # Install kubectl
@@ -7,16 +7,6 @@ RUN apt-get update && \
     curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
     chmod +x kubectl && \
     mv kubectl /usr/local/bin/ && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Install Docker dependencies
-RUN apt-get update && \
-    apt-get install -y apt-transport-https ca-certificates curl software-properties-common && \
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg && \
-    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list && \
-    apt-get update && \
-    apt-get install -y docker-ce docker-ce-cli containerd.io && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -29,17 +19,29 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Add the 'vscode' user to the Docker group (only if 'vscode' exists)
+# Install Docker and its dependencies
+RUN apt-get update && \
+    apt-get install -y apt-transport-https ca-certificates curl software-properties-common && \
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg && \
+    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list && \
+    apt-get update && \
+    apt-get install -y docker-ce docker-ce-cli containerd.io && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install Docker-in-Docker wrapper script
+RUN curl -fsSL https://raw.githubusercontent.com/docker-library/docker/master/dockerd-entrypoint.sh -o /usr/local/bin/dockerd-entrypoint.sh && \
+    chmod +x /usr/local/bin/dockerd-entrypoint.sh
+
+# Add the 'vscode' user to the Docker group
 RUN if id "vscode" &>/dev/null; then \
         groupadd -f docker && \
         usermod -aG docker vscode; \
     fi
 
-# Start Docker service at runtime
-RUN echo "sudo service docker start" >> /etc/profile.d/start-docker.sh
+# Expose Docker API port for DinD
+EXPOSE 2375
 
-# Set the default user to vscode
-USER vscode
-
-# Set an entrypoint script to start Docker if needed
-ENTRYPOINT ["bash", "-c", "sudo service docker start && exec bash"]
+# Use Docker-in-Docker entrypoint
+ENTRYPOINT ["dockerd-entrypoint.sh"]
+CMD ["dockerd"]

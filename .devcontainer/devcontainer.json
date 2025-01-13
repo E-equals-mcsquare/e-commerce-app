@@ -1,13 +1,14 @@
 {
-    "name": "GitHub Codespace with Docker, kubectl, and AWS CLI",
+    "name": "GitHub Codespace with Docker-in-Docker",
     "build": {
         "dockerfile": "Dockerfile"
     },
     "settings": {},
     "extensions": [
-        "ms-kubernetes-tools.vscode-kubernetes-tools", // Kubernetes extension for VS Code
-        "amazonwebservices.aws-toolkit-vscode" // Optional: AWS Toolkit extension
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+        "ms-azuretools.vscode-docker",
+        "amazonwebservices.aws-toolkit-vscode"
     ],
-    "postCreateCommand": "sudo service docker start && kubectl version --client && aws --version",
+    "postCreateCommand": "kubectl version --client && aws --version && docker --version",
     "remoteUser": "vscode"
 }

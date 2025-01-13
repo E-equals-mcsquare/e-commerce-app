@@ -1,0 +1,28 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16
+
+    - name: Install Dependencies
+      run: npm install --prefix ./backend/user-service
+
+    - name: Run Tests
+      run: npm test --prefix ./backend/user-service
+
+    - name: Build Docker Images
+      run: docker build -t user-service ./backend/user-service

@@ -29,11 +29,17 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Add the 'vscode' user to the Docker group
+# Add the 'vscode' user to the Docker group (only if 'vscode' exists)
 RUN if id "vscode" &>/dev/null; then \
         groupadd -f docker && \
         usermod -aG docker vscode; \
     fi
 
+# Start Docker service at runtime
+RUN echo "sudo service docker start" >> /etc/profile.d/start-docker.sh
+
 # Set the default user to vscode
 USER vscode
+
+# Set an entrypoint script to start Docker if needed
+ENTRYPOINT ["bash", "-c", "sudo service docker start && exec bash"]

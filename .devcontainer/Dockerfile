@@ -30,8 +30,10 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
     rm -rf /var/lib/apt/lists/*
 
 # Add the 'vscode' user to the Docker group
-RUN groupadd docker && \
-    usermod -aG docker vscode
+RUN if id "vscode" &>/dev/null; then \
+        groupadd -f docker && \
+        usermod -aG docker vscode; \
+    fi
 
 # Set the default user to vscode
 USER vscode

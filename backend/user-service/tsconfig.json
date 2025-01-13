@@ -1,0 +1,28 @@
+{
+    "compilerOptions": {
+      "resolveJsonModule": true,
+      
+      /* Projects */
+      "target": "ES2020",                                  /* Keep this as ES2020 for modern JS features */
+      "module": "commonjs",                                /* CommonJS is fine for Node.js environment */
+      "declaration": true,                                 /* Generate .d.ts files */
+      "outDir": "./dist",                                  /* Specify output folder */
+      "noEmit": false,                                     /* Allow file emission */
+      "esModuleInterop": true,                             /* Enable interop with CommonJS modules */
+      "forceConsistentCasingInFileNames": true,            /* Enforce consistent casing in imports */
+      "skipLibCheck": true,                                /* Skip type checking of declaration files */
+      "baseUrl": "./src",                                    /* Base URL for module resolution */
+      "rootDir": "./src",                                  /* Set root directory for source files */
+      "strict": false,                                     /* Disable strict type checking (fine if desired) */
+      
+      /* TypeScript for Mocha Testing */
+      "moduleResolution": "node",                          /* Use Node's module resolution mechanism */
+      "allowSyntheticDefaultImports": true                 /* Allow default imports from modules with no default export */
+    },
+    "include": [
+      "src/**/*.ts",
+      "public/**/*.html"
+    ],
+    "exclude": ["node_modules", "src/**/*.spec.ts"]
+  }
+  

@@ -1,0 +1,44 @@
+# Common files for both backend and frontend
+
+# Node modules
+**/node_modules
+
+# Logs
+logs/
+*.log
+
+# Environment variables
+*.env
+
+# Build files
+**/dist
+**/build
+
+# Dependency directories
+jspm_packages/
+
+# IDE files
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Coverage directory used by tools like istanbul
+**/coverage
+
+# Temporary files
+*.tmp
+*.swp
+
+# TypeScript declaration files
+*.d.ts
+
+# CSS and source maps
+**/*.css
+**/*.css.map
+
+# React files
+**/*.jsx
+**/*.tsx

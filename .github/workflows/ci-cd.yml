@@ -131,7 +131,7 @@ jobs:
           "cpu": "1024",
           "memory": "3072",
           "runtimePlatform": {
-              "cpuArchitecture": "ARM64",
+              "cpuArchitecture": "X86_64",
               "operatingSystemFamily": "LINUX"
           }
           }' > task-definition.json

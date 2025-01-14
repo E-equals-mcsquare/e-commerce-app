@@ -133,8 +133,7 @@ jobs:
           "runtimePlatform": {
               "cpuArchitecture": "ARM64",
               "operatingSystemFamily": "LINUX"
-          },
-          "enableFaultInjection": false
+          }
           }' > task-definition.json
           
           echo "TASK_DEFINITION=task-definition.json" >> $GITHUB_ENV

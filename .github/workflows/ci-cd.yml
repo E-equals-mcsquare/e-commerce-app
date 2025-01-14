@@ -28,7 +28,7 @@ jobs:
         node-version: 16
 
     - name: Install Dependencies
-      run: npm install --prefix $SERVICE_NAME
+      run: npm install --prefix ./backend/$SERVICE_NAME
 
     # Install AWS CLI
     - name: Install AWS CLI

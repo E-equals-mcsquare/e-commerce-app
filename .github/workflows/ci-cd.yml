@@ -157,6 +157,7 @@ jobs:
           echo "SERVICE_EXISTS=false" >> $GITHUB_ENV
         else
           echo "SERVICE_EXISTS=true" >> $GITHUB_ENV
+        fi
 
     # Create ECS Service if It Doesn't Exist
     - name: Create ECS Service

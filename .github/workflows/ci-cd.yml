@@ -28,7 +28,7 @@ jobs:
         node-version: 16
 
     - name: Install Dependencies
-      run: npm install --prefix $DOCKER_FILE_LOCATION
+      run: npm install --prefix $SERVICE_NAME
 
     # Install AWS CLI
     - name: Install AWS CLI

@@ -3,7 +3,7 @@ import express from "express";
 const app = express();
 require("dotenv").config();
 import cors from "cors";
-// import routes from "./routes";
+import routes from "./routes";
 
 app.use(express.json());
 const port = process.env.PORT;
@@ -15,7 +15,12 @@ app.use(
 );
 app.use(cors());
 
-// app.use("/user-service", routes);
+app.use("/user-service", routes);
+
+app.get("/health", (req, res) => {
+  res.status(200).json({ message: "Everything is good here !"})
+})
+
 app.get("/", (req, res) => {
   res.send(`User Service is running at port ${port}`);
 });

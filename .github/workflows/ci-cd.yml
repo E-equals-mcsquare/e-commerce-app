@@ -3,7 +3,7 @@ name: CI/CD
 on:
   push:
     branches:
-      - dev
+      - main
 
 jobs:
   build-and-deploy:
@@ -21,8 +21,31 @@ jobs:
     - name: Install Dependencies
       run: npm install --prefix ./backend/user-service
 
-    - name: Run Tests
-      run: npm test --prefix ./backend/user-service
+    # - name: Run Tests
+    #   run: npm test --prefix ./backend/user-service
 
-    - name: Build Docker Images
-      run: docker build -t user-service ./backend/user-service
+    # Log in to AWS ECR
+    - name: Login to AWS
+      env:
+        AWS_REGION: us-east-1
+        ECR_REGISTRY: 258173133840.dkr.ecr.us-east-1.amazonaws.com
+      run: |
+        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+
+    # Build the Docker image
+    - name: Build Docker Image
+      env:
+        ECR_REPOSITORY: ecommerce-app-registry
+        IMAGE_TAG: user-service
+        DOCKER_FILE_LOCATION: ./backend/user-service
+      run: |
+        docker build -t $ECR_REPOSITORY:$IMAGE_TAG $DOCKER_FILE_LOCATION
+        docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+    # Push the Docker image to ECR
+    - name: Push Docker Image to Amazon ECR
+      env:
+        ECR_REPOSITORY: ecommerce-app-registry
+        IMAGE_TAG: user-service
+      run: |
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG

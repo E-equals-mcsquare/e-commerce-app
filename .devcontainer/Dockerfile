@@ -33,6 +33,12 @@ RUN apt-get update && \
 RUN curl -fsSL https://raw.githubusercontent.com/docker-library/docker/master/dockerd-entrypoint.sh -o /usr/local/bin/dockerd-entrypoint.sh && \
     chmod +x /usr/local/bin/dockerd-entrypoint.sh
 
+# Install Node.js and npm (LTS version)
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 # Add the 'vscode' user to the Docker group
 RUN if id "vscode" &>/dev/null; then \
         groupadd -f docker && \

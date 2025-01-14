@@ -138,6 +138,12 @@ jobs:
           
           echo "TASK_DEFINITION=task-definition.json" >> $GITHUB_ENV
     
+    # Debug Task Definition
+    - name: Debug Task Definition
+      run: |
+        echo "Generated Task Definition:"
+        cat task-definition.json
+    
     # Deploy Amazon ECS task definition
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1

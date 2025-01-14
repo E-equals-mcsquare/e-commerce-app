@@ -8,7 +8,7 @@ logs/
 *.log
 
 # Environment variables
-*.env
+# *.env
 
 # Build files
 **/dist

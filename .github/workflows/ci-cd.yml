@@ -59,7 +59,7 @@ jobs:
         IMAGE_TAG: user-service
         DOCKER_FILE_LOCATION: ./backend/user-service
       run: |
-        docker build -t $ECR_REPOSITORY $DOCKER_FILE_LOCATION
+        docker build -t $ECR_REPOSITORY:$IMAGE_TAG $DOCKER_FILE_LOCATION
         docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
     # Push the Docker image to ECR

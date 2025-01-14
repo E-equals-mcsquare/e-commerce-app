@@ -17,6 +17,10 @@ jobs:
       ECR_REPOSITORY: myapps/$APP_NAME-repository
       IMAGE_TAG: $SERVICE_NAME
       DOCKER_FILE_LOCATION: ./backend/$SERVICE_NAME
+      CLUSTER_NAME: $APP_NAME-cluster
+      MIN_TASK_COUNT: 1
+      MAX_TASK_COUNT: 5
+      DESIRED_TASK_COUNT: 2
 
     steps:
     - name: Checkout Code
@@ -144,11 +148,46 @@ jobs:
         echo "Generated Task Definition:"
         cat task-definition.json
     
+    # Check if ECS Service Exists
+    - name: Check ECS Service
+      id: service-check
+      run: |
+        SERVICE_EXISTS=$(aws ecs describe-services --cluster $CLUSTER_NAME --services $APP_NAME-$SERVICE_NAME --query "services[0].serviceName" --output text 2>/dev/null || echo "None")
+        if [ "$SERVICE_EXISTS" == "None" ]; then
+          echo "SERVICE_EXISTS=false" >> $GITHUB_ENV
+        else
+          echo "SERVICE_EXISTS=true" >> $GITHUB_ENV
+
+    # Create ECS Service if It Doesn't Exist
+    - name: Create ECS Service
+      if: env.SERVICE_EXISTS == 'false'
+      run: |
+        aws ecs create-service \
+          --cluster $CLUSTER_NAME \
+          --service-name $APP_NAME-$SERVICE_NAME \
+          --task-definition $APP_NAME-task-$SERVICE_NAME \
+          --desired-count $DESIRED_TASK_COUNT \
+          --launch-type FARGATE \
+          --network-configuration "awsvpcConfiguration={subnets=[subnet-xxxxxx],securityGroups=[sg-xxxxxx],assignPublicIp=ENABLED}" \
+          --region $AWS_REGION
+
+    # Update Desired, Min, and Max Tasks
+    - name: Update ECS Service Tasks
+      if: env.SERVICE_EXISTS == 'true'
+      run: |
+        aws application-autoscaling register-scalable-target \
+          --service-namespace ecs \
+          --scalable-dimension ecs:service:DesiredCount \
+          --resource-id service/$CLUSTER_NAME/$APP_NAME-$SERVICE_NAME \
+          --min-capacity $MIN_TASK_COUNT \
+          --max-capacity $MAX_TASK_COUNT \
+          --region $AWS_REGION
+
     # Deploy Amazon ECS task definition
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: ${{ env.TASK_DEFINITION }}
         service: ${{ env.APP_NAME }}-${{ env.SERVICE_NAME }}
-        cluster: ${{ env.APP_NAME }}-cluster
+        cluster: ${{ env.CLUSTER_NAME }}
         wait-for-service-stability: true

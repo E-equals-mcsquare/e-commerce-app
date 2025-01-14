@@ -155,7 +155,7 @@ jobs:
       if: env.SERVICE_EXISTS == 'false'
       run: |
         aws ecs create-service \
-          --cluster ${CLUSTER_NAME} \
+          --cluster ${APP_NAME}-cluster \
           --service-name ${APP_NAME}-${SERVICE_NAME} \
           --task-definition ${APP_NAME}-task-${SERVICE_NAME} \
           --desired-count ${DESIRED_TASK_COUNT} \

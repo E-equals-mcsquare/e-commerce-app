@@ -66,7 +66,7 @@ jobs:
     - name: Push Docker Image to Amazon ECR
       env:
         ECR_REGISTRY: 258173133840.dkr.ecr.us-east-1.amazonaws.com
-        ECR_REPOSITORY: ecommerce-app-registry
+        ECR_REPOSITORY: myapps/ecommerce-app-repository
         IMAGE_TAG: user-service
       run: |
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG

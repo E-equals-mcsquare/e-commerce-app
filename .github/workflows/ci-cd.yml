@@ -9,6 +9,17 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
+    env:
+      APP_NAME: ecommerce-app
+      SERVICE_NAME: user-service
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      ECR_REGISTRY: 258173133840.dkr.ecr.us-east-1.amazonaws.com
+      ECR_REPOSITORY: myapps/${{ env.APP_NAME }}-repository
+      IMAGE_TAG: ${{ env.SERVICE_NAME }}
+      DOCKER_FILE_LOCATION: ./backend/${{ env.SERVICE_NAME }}
+
     steps:
     - name: Checkout Code
       uses: actions/checkout@v3
@@ -19,7 +30,7 @@ jobs:
         node-version: 16
 
     - name: Install Dependencies
-      run: npm install --prefix ./backend/user-service
+      run: npm install --prefix $DOCKER_FILE_LOCATION
 
     # - name: Run Tests
     #   run: npm test --prefix ./backend/user-service
@@ -34,10 +45,6 @@ jobs:
 
     # Configure AWS Credentials
     - name: Configure AWS Credentials
-      env:
-        AWS_REGION: us-east-1
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       run: |
         aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
         aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
@@ -45,28 +52,34 @@ jobs:
     
     # Log in to AWS ECR
     - name: Login to AWS
-      env:
-        AWS_REGION: us-east-1
-        ECR_REGISTRY: 258173133840.dkr.ecr.us-east-1.amazonaws.com
       run: |
         aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
 
     # Build the Docker image
     - name: Build Docker Image
-      env:
-        ECR_REGISTRY: 258173133840.dkr.ecr.us-east-1.amazonaws.com
-        ECR_REPOSITORY: myapps/ecommerce-app-repository
-        IMAGE_TAG: user-service
-        DOCKER_FILE_LOCATION: ./backend/user-service
       run: |
         docker build -t $ECR_REPOSITORY:$IMAGE_TAG $DOCKER_FILE_LOCATION
         docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
     # Push the Docker image to ECR
     - name: Push Docker Image to Amazon ECR
-      env:
-        ECR_REGISTRY: 258173133840.dkr.ecr.us-east-1.amazonaws.com
-        ECR_REPOSITORY: myapps/ecommerce-app-repository
-        IMAGE_TAG: user-service
       run: |
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+    # Fill in the new image ID in the Amazon ECS task definition
+    - name: Fill in the new image ID in the Amazon ECS task definition
+      id: task-def
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: ecommerce-app-task-user-service
+        container-name: user-service
+        image: ${{ steps.build-image.outputs.image }}
+
+    # Deploy Amazon ECS task definition
+    - name: Deploy Amazon ECS task definition
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ${{ steps.task-def.outputs.task-definition }}
+        service: ecommerce-app-user-service
+        cluster: ecommerce-app-cluster
+        wait-for-service-stability: true

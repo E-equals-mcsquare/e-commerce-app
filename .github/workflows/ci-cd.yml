@@ -14,9 +14,9 @@ jobs:
       SERVICE_NAME: user-service
       AWS_REGION: us-east-1
       ECR_REGISTRY: 258173133840.dkr.ecr.us-east-1.amazonaws.com
-      ECR_REPOSITORY: myapps/${{ env.APP_NAME }}-repository
-      IMAGE_TAG: ${{ env.SERVICE_NAME }}
-      DOCKER_FILE_LOCATION: ./backend/${{ env.SERVICE_NAME }}
+      ECR_REPOSITORY: myapps/$APP_NAME-repository
+      IMAGE_TAG: $SERVICE_NAME
+      DOCKER_FILE_LOCATION: ./backend/$SERVICE_NAME
 
     steps:
     - name: Checkout Code
@@ -28,7 +28,7 @@ jobs:
         node-version: 16
 
     - name: Install Dependencies
-      run: npm install --prefix ${{ env.DOCKER_FILE_LOCATION }}
+      run: npm install --prefix $DOCKER_FILE_LOCATION
 
     # Install AWS CLI
     - name: Install AWS CLI
@@ -44,38 +44,38 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.AWS_REGION }}
+        aws-region: $AWS_REGION
 
     # Log in to AWS ECR
     - name: Log in to AWS ECR
       run: |
-        aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
+        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
 
     # Build the Docker image
     - name: Build Docker Image
       run: |
-        docker build -t ${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} ${{ env.DOCKER_FILE_LOCATION }}
-        docker tag ${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+        docker build -t $ECR_REPOSITORY:$IMAGE_TAG $DOCKER_FILE_LOCATION
+        docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
     # Push the Docker image to ECR
     - name: Push Docker Image to Amazon ECR
       run: |
-        docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
     # Fill in the new image ID in the Amazon ECS task definition
     - name: Fill in the new image ID in the Amazon ECS task definition
       id: task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition: ${APP_NAME}-task-${SERVICE_NAME}
-        container-name: ${{ env.SERVICE_NAME }}
-        image: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+        task-definition: $APP_NAME-task-$SERVICE_NAME
+        container-name: $SERVICE_NAME
+        image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
     # Deploy Amazon ECS task definition
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: ${{ steps.task-def.outputs.task-definition }}
-        service: ${{ env.APP_NAME }}-${{ env.SERVICE_NAME }}
-        cluster: ${{ env.APP_NAME }}-cluster
+        service: $APP_NAME-$SERVICE_NAME
+        cluster: $APP_NAME-cluster
         wait-for-service-stability: true

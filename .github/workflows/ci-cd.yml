@@ -66,15 +66,6 @@ jobs:
       run: |
         docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
 
-    # # Fill in the new image ID in the Amazon ECS task definition
-    # - name: Fill in the new image ID in the Amazon ECS task definition
-    #   id: task-def
-    #   uses: aws-actions/amazon-ecs-render-task-definition@v1
-    #   with:
-    #     task-definition: $APP_NAME-task-$SERVICE_NAME
-    #     container-name: $SERVICE_NAME
-    #     image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-
     # Create ECS Task Definition Dynamically
     - name: Create ECS Task Definition
       id: task-def
@@ -164,13 +155,13 @@ jobs:
       if: env.SERVICE_EXISTS == 'false'
       run: |
         aws ecs create-service \
-          --cluster $CLUSTER_NAME \
-          --service-name $APP_NAME-$SERVICE_NAME \
-          --task-definition $APP_NAME-task-$SERVICE_NAME \
-          --desired-count $DESIRED_TASK_COUNT \
+          --cluster ${CLUSTER_NAME} \
+          --service-name ${APP_NAME}-${SERVICE_NAME} \
+          --task-definition ${APP_NAME}-task-${SERVICE_NAME} \
+          --desired-count ${DESIRED_TASK_COUNT} \
           --launch-type FARGATE \
           --network-configuration "awsvpcConfiguration={subnets=[subnet-xxxxxx],securityGroups=[sg-xxxxxx],assignPublicIp=ENABLED}" \
-          --region $AWS_REGION
+          --region ${AWS_REGION}
 
     # Update Desired, Min, and Max Tasks
     - name: Update ECS Service Tasks

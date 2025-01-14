@@ -54,13 +54,13 @@ jobs:
     # Build the Docker image
     - name: Build Docker Image
       run: |
-        docker build -t $ECR_REPOSITORY:$IMAGE_TAG $DOCKER_FILE_LOCATION
-        docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker build -t ${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} ${{ env.DOCKER_FILE_LOCATION }}
+        docker tag ${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
 
     # Push the Docker image to ECR
     - name: Push Docker Image to Amazon ECR
       run: |
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
 
     # Fill in the new image ID in the Amazon ECS task definition
     - name: Fill in the new image ID in the Amazon ECS task definition
